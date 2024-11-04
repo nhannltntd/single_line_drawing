@@ -5,6 +5,9 @@ import 'package:single_line_rawing/core/constants/colors.dart';
 import 'package:single_line_rawing/core/constants/size_globals.dart';
 import 'package:single_line_rawing/models/language_model.dart';
 import 'package:single_line_rawing/views/widgets/box_outline_button.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'permission_page.dart';
 
 class LanguagePage extends StatefulWidget {
   const LanguagePage({super.key});
@@ -31,7 +34,7 @@ class _LanguagePageState extends State<LanguagePage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    sellectionLanguage = 'en'; // Default language
+    sellectionLanguage = 'en';
     currentLanguageNumber =
         List.generate(languageModel.length, (index) => index);
   }
@@ -56,7 +59,7 @@ class _LanguagePageState extends State<LanguagePage>
       backgroundColor: AppColor.backgroundMain,
       appBar: AppBar(
         title: Text(
-          'Languages',
+          AppLocalizations.of(context).languages,
           style: TextStyle(
             fontFamily: "Draw-SemiBold",
             color: GlobalColor.mediumBlue,
@@ -73,7 +76,10 @@ class _LanguagePageState extends State<LanguagePage>
             padding: EdgeInsets.only(right: GlobalSize.size_12),
             child: InkWell(
               onTap: () {
-                Navigator.pop(context, sellectionLanguage);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => PermissionPage()),
+                );
               },
               child: SvgPicture.asset(
                 "assets/svgs/check.svg",

@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:single_line_rawing/controllers/language/localization_bloc.dart';
+import 'package:single_line_rawing/services/android_version_check.dart';
 import 'package:single_line_rawing/views/pages/splash_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AndroidVersionCheck.checkAndSaveAndroidVersion();
   runApp(const MyApp());
 }
 

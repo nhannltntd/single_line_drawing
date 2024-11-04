@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:single_line_rawing/views/pages/language_page.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({Key? key}) : super(key: key);
@@ -38,9 +39,9 @@ class _SplashPageState extends State<SplashPage> with WidgetsBindingObserver {
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.01,
             ),
-            const Text(
-              'AppLocalizations.of(context)!.app_name',
-              style: TextStyle(
+            Text(
+              AppLocalizations.of(context).app_name,
+              style: const TextStyle(
                 fontFamily: "Draw-Bold",
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
@@ -56,10 +57,10 @@ class _SplashPageState extends State<SplashPage> with WidgetsBindingObserver {
           children: [
             Lottie.asset("assets/lotties/loading_splash.json",
                 fit: BoxFit.contain, height: 50),
-            const SafeArea(
+            SafeArea(
               child: Text(
-                'AppLocalizations.of(context)!.actionContainsAds',
-                style: TextStyle(
+                AppLocalizations.of(context).actionContainsAds,
+                style: const TextStyle(
                   fontFamily: "Draw-Regular",
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
