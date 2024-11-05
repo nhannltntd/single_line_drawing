@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:single_line_rawing/core/constants/colors.dart';
-import 'onboarding_screen.dart';
+import 'package:single_line_rawing/views/pages/language_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({Key? key}) : super(key: key);
@@ -19,7 +19,7 @@ class _SplashPageState extends State<SplashPage> with WidgetsBindingObserver {
     Future.delayed(const Duration(milliseconds: 3500), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+        MaterialPageRoute(builder: (context) => const LanguagePage()),
       );
     });
   }
