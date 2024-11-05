@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-import 'package:single_line_rawing/views/pages/language_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'onboarding_screen.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({Key? key}) : super(key: key);
@@ -18,7 +18,7 @@ class _SplashPageState extends State<SplashPage> with WidgetsBindingObserver {
     Future.delayed(const Duration(milliseconds: 3500), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const LanguagePage()),
+        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
       );
     });
   }
