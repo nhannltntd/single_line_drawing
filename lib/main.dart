@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:single_line_rawing/controllers/language/localization_bloc.dart';
+import 'package:single_line_rawing/controllers/rate_bloc.dart';
 import 'package:single_line_rawing/services/android_version_check.dart';
 import 'package:single_line_rawing/views/pages/splash_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -25,6 +26,9 @@ class MyApp extends StatelessWidget {
               LoadSavedLocalization(),
             ),
         ),
+        BlocProvider(
+          create: (BuildContext context) => RateBloc(),
+        ),
       ],
       child: BlocBuilder<LocalizationBloc, LocalizationState>(
         builder: (context, state) {
@@ -39,6 +43,8 @@ class MyApp extends StatelessWidget {
                 localizationsDelegates: AppLocalizations.localizationsDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,
                 locale: state.locale,
+                theme: ThemeData(useMaterial3: false),
+                themeMode: ThemeMode.light,
               );
             },
             child: const SplashPage(),

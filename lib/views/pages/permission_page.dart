@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:single_line_rawing/core/constants/colors.dart';
 import 'package:single_line_rawing/services/android_version_check.dart';
 import '../../core/constants/size_globals.dart';
+import '../setting/setting_page.dart';
 
 class PermissionPage extends StatefulWidget {
   const PermissionPage({super.key});
@@ -210,21 +211,30 @@ class _PermissionPageState extends State<PermissionPage>
                   ),
                 ),
               const SizedBox(height: 40),
-              Container(
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                decoration: BoxDecoration(
-                  color: Colors.amber,
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Text(
-                  canContinue
-                      ? AppLocalizations.of(context).continue_per
-                      : AppLocalizations.of(context).cont_without_permission,
-                  style: TextStyle(
-                    fontFamily: "Draw-Medium",
-                    fontSize: 16.sp,
-                    color: Colors.white,
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const SettingPage()),
+                  );
+                },
+                child: Container(
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.amber,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Text(
+                    canContinue
+                        ? AppLocalizations.of(context).continue_per
+                        : AppLocalizations.of(context).cont_without_permission,
+                    style: TextStyle(
+                      fontFamily: "Draw-Medium",
+                      fontSize: 16.sp,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),

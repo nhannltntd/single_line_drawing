@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:single_line_rawing/core/constants/colors.dart';
 import 'onboarding_screen.dart';
 
 class SplashPage extends StatefulWidget {
@@ -26,6 +27,7 @@ class _SplashPageState extends State<SplashPage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: GlobalColor.bgAppColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

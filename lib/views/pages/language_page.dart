@@ -10,7 +10,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'permission_page.dart';
 
 class LanguagePage extends StatefulWidget {
-  const LanguagePage({super.key});
+  final bool isSetting;
+  const LanguagePage({super.key, this.isSetting = false});
 
   @override
   State<LanguagePage> createState() => _LanguagePageState();
@@ -56,38 +57,73 @@ class _LanguagePageState extends State<LanguagePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColor.backgroundMain,
-      appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context).languages,
-          style: TextStyle(
-            fontFamily: "Draw-SemiBold",
-            color: GlobalColor.mediumBlue,
-            fontWeight: FontWeight.bold,
-            fontSize: GlobalFontSize.headerPopup_S22,
-          ),
-        ),
-        automaticallyImplyLeading: false,
-        backgroundColor: AppColor.backgroundMain,
-        elevation: 0,
-        toolbarHeight: 80.h,
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: GlobalSize.size_12),
-            child: InkWell(
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => PermissionPage()),
-                );
-              },
-              child: SvgPicture.asset(
-                "assets/svgs/check.svg",
+      backgroundColor: GlobalColor.bgAppColor,
+      appBar: widget.isSetting
+          ? AppBar(
+              foregroundColor: GlobalColor.bgAppColor,
+              shadowColor: Colors.transparent,
+              backgroundColor: GlobalColor.bgAppColor,
+              surfaceTintColor: GlobalColor.bgAppColor,
+              leading: IconButton(
+                icon: SvgPicture.asset('assets/svgs/btn_back.svg'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
               ),
+              title: Text(
+                AppLocalizations.of(context).language,
+                style: TextStyle(
+                  fontFamily: "Draw-Bold",
+                  color: GlobalColor.mediumBlue,
+                  fontSize: GlobalFontSize.textButtonPopup_S20,
+                ),
+              ),
+              flexibleSpace: Container(
+                decoration: const BoxDecoration(
+                  color: GlobalColor.bgAppColor,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(22.0),
+                    bottomRight: Radius.circular(22.0),
+                  ),
+                ),
+              ),
+              elevation: 10,
+              automaticallyImplyLeading: true,
+              toolbarHeight: 110,
+              centerTitle: true,
+            )
+          : AppBar(
+              title: Text(
+                AppLocalizations.of(context).languages,
+                style: TextStyle(
+                  fontFamily: "Draw-SemiBold",
+                  color: GlobalColor.mediumBlue,
+                  fontWeight: FontWeight.bold,
+                  fontSize: GlobalFontSize.headerPopup_S22,
+                ),
+              ),
+              automaticallyImplyLeading: false,
+              backgroundColor: AppColor.backgroundMain,
+              elevation: 0,
+              toolbarHeight: 80.h,
+              actions: [
+                Padding(
+                  padding: EdgeInsets.only(right: GlobalSize.size_12),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => PermissionPage()),
+                      );
+                    },
+                    child: SvgPicture.asset(
+                      "assets/svgs/check.svg",
+                    ),
+                  ),
+                )
+              ],
             ),
-          )
-        ],
-      ),
       body: Column(
         children: [
           Expanded(

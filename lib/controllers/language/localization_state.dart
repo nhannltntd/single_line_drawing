@@ -10,7 +10,7 @@ class LocalizationState extends Equatable {
   }
 
   LocalizationState copyWith(Locale locale) {
-    return LocalizationState(locale ?? this.locale);
+    return LocalizationState(locale);
   }
 
   @override
