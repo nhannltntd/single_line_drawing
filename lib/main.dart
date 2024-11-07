@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:single_line_rawing/controllers/language/localization_bloc.dart';
 import 'package:single_line_rawing/controllers/rate_bloc.dart';
 import 'package:single_line_rawing/services/android_version_check.dart';
-import 'package:single_line_rawing/views/pages/splash_page.dart';
+import 'package:single_line_rawing/views/home/pages/home_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void main() async {
@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
                 themeMode: ThemeMode.light,
               );
             },
-            child: const SplashPage(),
+            child: const HomePage(),
           );
         },
       ),
