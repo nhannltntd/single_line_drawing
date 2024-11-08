@@ -33,64 +33,117 @@ class _HomePageState extends State<HomePage> {
   bool isDrawing = false;
   String message = '';
   int lastDotIndex = -1;
+  List<Offset> currentDrawingPoints = [];
+  double currentProgress = 0.0;
+
+  Offset getProjectedPoint(Offset point, Offset lineStart, Offset lineEnd) {
+    final lineVector = lineEnd - lineStart;
+    final pointVector = point - lineStart;
+
+    final lineLength = lineVector.distance;
+    if (lineLength == 0) return lineStart;
+
+    final t =
+        (pointVector.dx * lineVector.dx + pointVector.dy * lineVector.dy) /
+            (lineLength * lineLength);
+
+    final clampedT = t.clamp(0.0, 1.0);
+
+    return lineStart + (lineVector * clampedT);
+  }
+
+  int? lastCompletedDotIndex;
 
   void _onPanStart(DragStartDetails details) {
-    // ✅ Kiểm tra khi người dùng bắt đầu chạm lên màn hình
     int dotIndex = _getNearestDotIndex(details.localPosition);
-    // tức là kiểm tra xem ngón tay người dùng chọn vào nó ngay điểm nào
     if (dotIndex != -1) {
-      setState(() {
-        lines.clear();
-        visitedDots.clear();
-        traversedEdges.clear();
-        isDrawing = true;
-        lastDotIndex = dotIndex;
-        visitedDots.add(dotIndex);
-        message = '';
-      });
+      // Kiểm tra xem có thể bắt đầu từ điểm này không
+      bool canStartFromHere =
+          lastCompletedDotIndex == null || dotIndex == lastCompletedDotIndex;
+
+      if (canStartFromHere) {
+        setState(() {
+          if (lastCompletedDotIndex == null) {
+            // Nếu là lần đầu vẽ, xóa hết
+            lines.clear();
+            visitedDots.clear();
+            traversedEdges.clear();
+          }
+          isDrawing = true;
+          lastDotIndex = dotIndex;
+          currentDrawingPoints = [dots[dotIndex]];
+          if (!visitedDots.contains(dotIndex)) {
+            visitedDots.add(dotIndex);
+          }
+          message = '';
+          currentProgress = 0.0;
+        });
+      }
     }
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
     if (!isDrawing) return;
 
-    // ✅kiểm tra khi user nó di chuyển đến chổ khác xem có trúng vào nút không
-    int dotIndex = _getNearestDotIndex(details.localPosition);
-    if (dotIndex != -1 && dotIndex != lastDotIndex) {
-      Edge attemptedEdge = Edge(lastDotIndex, dotIndex);
+    if (lastDotIndex != -1) {
+      Offset startPoint = dots[lastDotIndex];
+      Offset? endPoint;
 
-      // check nếu cạnh hợp lê
-      bool isValidEdge = edges.contains(attemptedEdge) ||
-          edges.contains(attemptedEdge.reversed());
+      // Tìm cạnh hợp lệ từ điểm hiện tại
+      for (int i = 0; i < dots.length; i++) {
+        if (i != lastDotIndex) {
+          Edge attemptedEdge = Edge(lastDotIndex, i);
+          if (edges.contains(attemptedEdge) ||
+              edges.contains(attemptedEdge.reversed())) {
+            // Kiểm tra xem chuột có nằm gần đường thẳng không
+            Offset projectedPoint =
+                getProjectedPoint(details.localPosition, startPoint, dots[i]);
+            double distanceToLine =
+                (details.localPosition - projectedPoint).distance;
 
-      if (!isValidEdge) {
-        setState(() {
-          isDrawing = false;
-          message = 'Thất bại! Cạnh không hợp lệ!';
-        });
-        return;
+            // Nếu chuột đủ gần đường thẳng (trong phạm vi 30 pixel)
+            if (distanceToLine < 30) {
+              endPoint = dots[i];
+              break;
+            }
+          }
+        }
       }
 
-      // ✅Kiểm tra cạnh được đi qua
-      String edgeKey = attemptedEdge.getKey();
-      if (traversedEdges.contains(edgeKey)) {
-        // Cạnh đã được đi qua trước đó
+      if (endPoint != null) {
+        // Tính điểm chiếu
+        Offset projectedPoint =
+            getProjectedPoint(details.localPosition, startPoint, endPoint);
+
         setState(() {
-          isDrawing = false;
-          message = 'Thất bại! Bạn không được đi lại đường cũ!';
-        });
-      } else {
-        setState(() {
-          // Thêm cạnh mới
-          traversedEdges.add(edgeKey);
-          lines.add(Line(
-            start: dots[lastDotIndex],
-            end: dots[dotIndex],
-          ));
-          if (!visitedDots.contains(dotIndex)) {
-            visitedDots.add(dotIndex);
+          currentDrawingPoints = [
+            startPoint,
+            projectedPoint,
+          ];
+
+          // Tính tiến độ vẽ
+          currentProgress = (projectedPoint - startPoint).distance /
+              (endPoint! - startPoint).distance;
+
+          if (currentProgress > 0.9) {
+            Edge attemptedEdge = Edge(lastDotIndex, dots.indexOf(endPoint));
+            String edgeKey = attemptedEdge.getKey();
+
+            if (!traversedEdges.contains(edgeKey)) {
+              traversedEdges.add(edgeKey);
+              lines.add(Line(
+                start: startPoint,
+                end: endPoint,
+                progress: 1.0,
+              ));
+              if (!visitedDots.contains(dots.indexOf(endPoint))) {
+                visitedDots.add(dots.indexOf(endPoint));
+              }
+              lastDotIndex = dots.indexOf(endPoint);
+              currentDrawingPoints = [dots[lastDotIndex]];
+              currentProgress = 0.0;
+            }
           }
-          lastDotIndex = dotIndex;
         });
       }
     }
@@ -99,9 +152,14 @@ class _HomePageState extends State<HomePage> {
   void _onPanEnd(DragEndDetails details) {
     setState(() {
       isDrawing = false;
+      if (lastDotIndex != -1) {
+        lastCompletedDotIndex = lastDotIndex;
+      }
       lastDotIndex = -1;
-      if (message.isEmpty) {
+      currentDrawingPoints.clear();
+      if (traversedEdges.length == edges.length) {
         _checkPuzzleCompletion();
+        lastCompletedDotIndex = null;
       }
     });
   }
@@ -116,11 +174,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _checkPuzzleCompletion() {
-    // Kiểm tra nếu người dùng đã đi qua tất cả các cạnh hợp lệ
     if (traversedEdges.length == edges.length) {
       message = 'Chúc mừng! Bạn đã hoàn thành game!';
+      lastCompletedDotIndex = null;
     } else {
-      message = 'Thất bại! Bạn chưa đi qua tất cả các cạnh!';
+      message = 'Bạn có thể tiếp tục từ điểm cuối cùng!';
     }
   }
 
@@ -152,6 +210,10 @@ class _HomePageState extends State<HomePage> {
                     edges: edges,
                     visitedDots: visitedDots,
                     traversedEdges: traversedEdges,
+                    currentDrawingPoints: currentDrawingPoints,
+                    isDrawing: isDrawing,
+                    currentProgress: currentProgress,
+                    lastCompletedDotIndex: lastCompletedDotIndex,
                   ),
                 ),
               ),
@@ -161,6 +223,13 @@ class _HomePageState extends State<HomePage> {
               message,
               style: const TextStyle(fontSize: 18),
             ),
+            if (lastCompletedDotIndex != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                'Tiếp tục từ điểm ${lastCompletedDotIndex! + 1}',
+                style: const TextStyle(fontSize: 16, color: Colors.blue),
+              ),
+            ],
           ],
         ),
       ),
