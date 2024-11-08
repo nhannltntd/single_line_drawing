@@ -3,14 +3,29 @@ import 'package:single_line_rawing/modules/puzzle_painter/edge.dart';
 import 'package:single_line_rawing/modules/puzzle_painter/line.dart';
 import 'package:single_line_rawing/modules/puzzle_painter/puzzle_painter.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Single Line Drawing',
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+      ),
+      home: const PuzzlePage(),
+    );
+  }
 }
 
-class _HomePageState extends State<HomePage> {
+class PuzzlePage extends StatefulWidget {
+  const PuzzlePage({super.key});
+
+  @override
+  State<PuzzlePage> createState() => _PuzzlePageState();
+}
+
+class _PuzzlePageState extends State<PuzzlePage> {
   final List<Offset> dots = [
     const Offset(100, 100),
     const Offset(300, 100),
@@ -52,33 +67,20 @@ class _HomePageState extends State<HomePage> {
     return lineStart + (lineVector * clampedT);
   }
 
-  int? lastCompletedDotIndex;
-
   void _onPanStart(DragStartDetails details) {
     int dotIndex = _getNearestDotIndex(details.localPosition);
     if (dotIndex != -1) {
-      // Kiểm tra xem có thể bắt đầu từ điểm này không
-      bool canStartFromHere =
-          lastCompletedDotIndex == null || dotIndex == lastCompletedDotIndex;
-
-      if (canStartFromHere) {
-        setState(() {
-          if (lastCompletedDotIndex == null) {
-            // Nếu là lần đầu vẽ, xóa hết
-            lines.clear();
-            visitedDots.clear();
-            traversedEdges.clear();
-          }
-          isDrawing = true;
-          lastDotIndex = dotIndex;
-          currentDrawingPoints = [dots[dotIndex]];
-          if (!visitedDots.contains(dotIndex)) {
-            visitedDots.add(dotIndex);
-          }
-          message = '';
-          currentProgress = 0.0;
-        });
-      }
+      setState(() {
+        lines.clear();
+        visitedDots.clear();
+        traversedEdges.clear();
+        isDrawing = true;
+        lastDotIndex = dotIndex;
+        currentDrawingPoints = [dots[dotIndex]];
+        visitedDots.add(dotIndex);
+        message = '';
+        currentProgress = 0.0;
+      });
     }
   }
 
@@ -136,10 +138,23 @@ class _HomePageState extends State<HomePage> {
                 end: endPoint,
                 progress: 1.0,
               ));
-              if (!visitedDots.contains(dots.indexOf(endPoint))) {
-                visitedDots.add(dots.indexOf(endPoint));
+
+              int newDotIndex = dots.indexOf(endPoint);
+              if (!visitedDots.contains(newDotIndex)) {
+                visitedDots.add(newDotIndex);
               }
-              lastDotIndex = dots.indexOf(endPoint);
+              lastDotIndex = newDotIndex;
+
+              // Kiểm tra xem có thể đi tiếp được không
+              if (!hasAvailableEdges(lastDotIndex) &&
+                  traversedEdges.length != edges.length) {
+                setState(() {
+                  message = 'Thất bại! Bạn đã đi vào ngõ cụt!';
+                  isDrawing = false;
+                });
+                return;
+              }
+
               currentDrawingPoints = [dots[lastDotIndex]];
               currentProgress = 0.0;
             }
@@ -152,14 +167,10 @@ class _HomePageState extends State<HomePage> {
   void _onPanEnd(DragEndDetails details) {
     setState(() {
       isDrawing = false;
-      if (lastDotIndex != -1) {
-        lastCompletedDotIndex = lastDotIndex;
-      }
       lastDotIndex = -1;
       currentDrawingPoints.clear();
-      if (traversedEdges.length == edges.length) {
+      if (message.isEmpty) {
         _checkPuzzleCompletion();
-        lastCompletedDotIndex = null;
       }
     });
   }
@@ -176,10 +187,22 @@ class _HomePageState extends State<HomePage> {
   void _checkPuzzleCompletion() {
     if (traversedEdges.length == edges.length) {
       message = 'Chúc mừng! Bạn đã hoàn thành game!';
-      lastCompletedDotIndex = null;
     } else {
-      message = 'Bạn có thể tiếp tục từ điểm cuối cùng!';
+      message = 'Thất bại! Bạn chưa đi qua tất cả các cạnh!';
     }
+  }
+
+  // Thêm method để kiểm tra xem từ một điểm có thể đi tiếp được không
+  bool hasAvailableEdges(int currentDotIndex) {
+    for (var edge in edges) {
+      String edgeKey = edge.getKey();
+      if ((edge.startIndex == currentDotIndex ||
+              edge.endIndex == currentDotIndex) &&
+          !traversedEdges.contains(edgeKey)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @override
@@ -213,7 +236,6 @@ class _HomePageState extends State<HomePage> {
                     currentDrawingPoints: currentDrawingPoints,
                     isDrawing: isDrawing,
                     currentProgress: currentProgress,
-                    lastCompletedDotIndex: lastCompletedDotIndex,
                   ),
                 ),
               ),
@@ -223,13 +245,6 @@ class _HomePageState extends State<HomePage> {
               message,
               style: const TextStyle(fontSize: 18),
             ),
-            if (lastCompletedDotIndex != null) ...[
-              const SizedBox(height: 10),
-              Text(
-                'Tiếp tục từ điểm ${lastCompletedDotIndex! + 1}',
-                style: const TextStyle(fontSize: 16, color: Colors.blue),
-              ),
-            ],
           ],
         ),
       ),

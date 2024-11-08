@@ -11,11 +11,10 @@ class PuzzlePainter extends CustomPainter {
   final List<Offset> currentDrawingPoints;
   final bool isDrawing;
   final double currentProgress;
-  final int? lastCompletedDotIndex;
+
   PuzzlePainter({
     required this.dots,
     required this.lines,
-    this.lastCompletedDotIndex,
     required this.edges,
     required this.visitedDots,
     required this.traversedEdges,
@@ -65,17 +64,10 @@ class PuzzlePainter extends CustomPainter {
 
     // Vẽ các điểm
     for (int i = 0; i < dots.length; i++) {
-      final paint = Paint()..style = PaintingStyle.fill;
-
-      // Đổi màu điểm cuối cùng đã hoàn thành
-      if (i == lastCompletedDotIndex) {
-        paint.color = Colors.blue; // Điểm có thể tiếp tục
-      } else if (visitedDots.contains(i)) {
-        paint.color = Colors.grey; // Điểm đã đi qua
-      } else {
-        paint.color = const Color(0xFF4CAF50); // Điểm chưa đi qua
-      }
-
+      final paint = Paint()
+        ..color =
+            visitedDots.contains(i) ? Colors.grey : const Color(0xFF4CAF50)
+        ..style = PaintingStyle.fill;
       canvas.drawCircle(dots[i], 10, paint);
     }
   }
